@@ -496,7 +496,7 @@ const TodoListItem = ({onToggleImportant, onToggleDone}) => {
 
 > Текущая активная кнопка передается, как свойство. это продолжение идеи "Контролируемых компонентов".
 
-# 1. добавляем в App.js функцию filterItem() для фильтрации элементом.
+### 1. добавляем в App.js функцию filterItem() для фильтрации элементом.
 ```js
 	// принимает массив элементов ITEMS, и текущий включенный фильтр FILTER
     filterItems(items, filter) {
@@ -512,21 +512,21 @@ const TodoListItem = ({onToggleImportant, onToggleDone}) => {
         }
     }    
 ```
-# 2. устанавливаем новый параметр для state. Этот параметр будет обновлятся в результате нажатий кнопочек с нашего компонента ItemStatusFilter.
+### 2. устанавливаем новый параметр для state. Этот параметр будет обновлятся в результате нажатий кнопочек с нашего компонента ItemStatusFilter.
 ```js
 state = {
 	filter: 'all'
 };
 ```
 
-# 3. добавляем eventLintener в компоненту <ItemStatusFilter />.
+### 3. добавляем eventLintener в компоненту <ItemStatusFilter />.
 > именно он обновляет состояние нашего компонента
 ```js
 <ItemStatusFilter filter={filter} 
 	onFilterChange = {this.onFilterChange} />
 ```
 
-# 4. в файле item-status-filter.js определяем какая кнопка сейчас активна и делаем переборос на app.js
+### 4. в файле item-status-filter.js определяем какая кнопка сейчас активна и делаем переборос на app.js
 ```js
     buttons = [
         { name: 'all', label: 'All' },
