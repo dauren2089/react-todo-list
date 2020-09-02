@@ -295,7 +295,6 @@ npm start
 	}
 ````
 
-
 Пример c обработкой предыдущего значения:
 ```js
     onMarkImportant = () => {
@@ -312,7 +311,7 @@ npm start
 > Достаточно передать callback функцию, как property, а затем вызвать ее из компонента, когда наступило событие
 
 >  Через события, данные поднимаются "ВВЕРХ" по иерархии компонентов
-
+```JSON
 <App>			<--- todoData
 	<AppHeader>
 	<SearchPanel>
@@ -320,6 +319,7 @@ npm start
 	<TodoList>			<--- id
 		<TodoListItem>	<--- Button 
 		<TodoListItem>
+```
 
 ## 14.7 SetState() - удаление объектов
 
@@ -327,7 +327,171 @@ npm start
 
 > методы которые изменяют (mutate) массив использовать нельзя
 
-> newArr = [...oldArr.slice(0, idx),
+```js
+newArr = [...oldArr.slice(0, idx),
 			...oldArr.slice(idx + 1)];
+```
 
 > не изменяет oldArr
+
+## 14.8 SetState() - добавление элементов
+
+> arr.push(newElement) - тоже изменение массива в state (нельзя выполнять на массивах хранимых в state)
+
+> добавить элемент в конец массива 
+```js
+const newArr = [...oldArr, newItem]
+```
+
+>добавить элемент в начало массива 
+```js
+const newArr = [newItem, ...oldArr]
+```
+
+## 14.9 Проброс связей данных между компонентами
+
+> Централизировать управление данными - хорошая практика 
+
+> Если данные нужно использовать в нескольких компонентах - их нужно хранить в родительском компоненте
+
+> Чтобы "Поднять" данные на вверх по иерархии компоенентов, используйте события!
+
+Родительский компоненет APP.js
+```js
+	<TodoList
+    onToggleImportant = { this.toggleImportant }
+    onToggleDone = { this.toggleDone } />
+````
+
+Компонент по середине TODO-LIST.JS
+```js
+const TodoList = ({ onToggleImportant, onToggleDone }) => {
+        return (
+        <TodoListItem {...itemProps }
+	     	onToggleImportant = { () => onToggleImportant(id) }
+	    	onToggleDone = { () => onToggleDone(id) } />
+		)
+	}
+
+```
+
+исходный компонент TODO-LIST-ITEM.JS
+```js
+const TodoListItem = ({onToggleImportant, onToggleDone}) => {
+		return(
+			    <span className={classNames}>
+                	<span className="todo-list-item-label"
+                      	onClick={ onToggleDone }>
+                        	{label}
+                	</span>
+	            	<button type="button float-right"
+	                    onClick={ onToggleImportant }>
+	                        <i className="fa fa-exclamation" />
+	                </button>
+                </span>
+			)
+```
+
+## 14.10 SetState() - редактирование элементов
+
+> oldObj нельзя изменять
+
+> Но можно скопировать в новый объект
+```js
+	newObj = {...oldObj, prop: newValue};
+
+	newArr = [...oldArr.slice(0, index),
+				newObj,
+			  ...oldArr.slice(index + 1)];
+```
+
+> Чтобы "Поднять" данные на вверх по иерархии компоенентов, используйте события!
+
+## 14.10 Работа с формами
+
+> используем onChange() чтобы получать текущее значение
+
+> onSubmit() - событие отправки формы
+
+> e.preventDefault() - чтобы страница не перезагружалась
+
+```js
+	<form className="item-add-form d-flex"
+	        onSubmit={this.onSubmit}>
+	    <input type="text"
+	            className="form-control"
+	            onChange={ this.onLabelChange }
+	            placeholder="What needs to be done?"
+	           value={this.state.label} />
+	    <button
+	        className="btn btn-info add-button">
+	        Add Item
+	    </button>
+	</form>
+```
+
+## 14.10 Контролируемые компоненты
+
+> Необходимо избегать не контролируемых компонентов. К примеру выше, форма ввода не обновлялась после ввода текста пользователем.
+и связи между значениями State и формой отсутствовали.
+
+> onChange() - обновляет state, а state обновляет value элемента 
+
+> state - единственный источник значений
+
+> легко обновлять value, можно обновлять не только в ответ на ввод пользователя.
+
+## 15. Реализация функции поиска
+
+> Компонент App получил новый элемент (term) в state, в котором мы будем хранить текст для поиска.
+
+```js
+    state = {
+        term: ''
+    };
+```
+
+> Перед тем, как отображать элементы в Render(), мы отфильтруем нужные элементы в функции фильтра.
+
+```js
+    search(items, term) {
+    	// если еще нет совпадения и не введен текст, выводим весь массив элементов
+        if (term.length === 0) {
+            return items;
+        }
+        // если буква соответствует букве элемента, выводим соответствующие элементы
+        return  items.filter((item) => {
+            return item.label
+                .toLowerCase()
+                .indexOf(term.toLowerCase()) > -1;
+        });
+    }
+```
+
+>  Компонент SearchPanel генерирует событие OnSearchChange на каждое нажатие клавиши (чтобы App обновлял список).
+
+> Используем "проброс" через компоненты для связи между ними
+
+```js
+    onSearchChange = (term) => {
+        this.setState( { term } );
+    }
+
+    render() {
+		const { todoData, term } = this.state;
+
+        const visibleItems = this.search(todoData, term);
+
+        return (
+				<SearchPanel onSearchChange = { this.onSearchChange }/>
+        	)
+    }
+```
+
+## 17. Реализация поиска
+
+> фильтры работают на 90% так же, как поиск 
+
+> В компоненте ItemStatusFilter мы внесли описание кнопок в отдельный массив, чтобы не дублировать if'ы для каждой
+
+> Текущая активная кнопка передается, как свойство. это продолжение идеи "Контролируемых компонентов".
