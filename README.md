@@ -495,3 +495,55 @@ const TodoListItem = ({onToggleImportant, onToggleDone}) => {
 > В компоненте ItemStatusFilter мы внесли описание кнопок в отдельный массив, чтобы не дублировать if'ы для каждой
 
 > Текущая активная кнопка передается, как свойство. это продолжение идеи "Контролируемых компонентов".
+
+# 1. добавляем в App.js функцию filterItem() для фильтрации элементом.
+```js
+	// принимает массив элементов ITEMS, и текущий включенный фильтр FILTER
+    filterItems(items, filter) {
+        switch (filter) {
+            case 'all':
+                return items;
+            case 'active':
+                return items.filter((item) => !item.done);
+            case 'done':
+                return items.filter((item) => item.done);
+            default:
+                return items;
+        }
+    }    
+```
+# 2. устанавливаем новый параметр для state. Этот параметр будет обновлятся в результате нажатий кнопочек с нашего компонента ItemStatusFilter.
+```js
+state = {
+	filter: 'all'
+};
+```
+
+# 3. добавляем eventLintener в компоненту <ItemStatusFilter />.
+> именно он обновляет состояние нашего компонента
+```js
+<ItemStatusFilter filter={filter} 
+	onFilterChange = {this.onFilterChange} />
+```
+
+# 4. в файле item-status-filter.js определяем какая кнопка сейчас активна и делаем переборос на app.js
+```js
+    buttons = [
+        { name: 'all', label: 'All' },
+        { name: 'active', label: 'Active' },
+        { name: 'done', label: 'Done' }
+    ];
+
+    render() {
+        const  { filter, onFilterChange } = this.props;
+        
+        const buttons = this.buttons.map(({ name, label}) => {
+            const isActive = filter === name;
+            const clazz = isActive ? 'btn-info' : 'btn-outline-secondary';
+            return (
+                <button key={name} type="button" className={"btn ${clazz}"} onClick={() => onFilterChange(name)}> {label}
+                </button>
+            );
+        });
+    }
+```
